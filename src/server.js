@@ -1,66 +1,75 @@
 import express from "express";
+import "dotenv/config";
+import AnimeRouter from "./routes/animes.routes.js";
 
+const PORT = process.env.PORT || 5000;
 const app = express();
 
-// http://localhost:5173
-// PORTS [3001 node application]
-// http://localhost:3001/
+// middleware
+app.use(express.json());
+
+// routes
+app.use("/animes", AnimeRouter);
+
+app.listen(PORT, () => console.log("Server running on port: 5000"));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// express is is our backend framework
+// server speaks to the database, and the frontend/client
+// PORT - choosing a port to run our node/express application on locally (localhost)
+// HTTP methods:
 
 /**
- * HTTP METHODS
- * GET - get some data
- * POST - create a resource
- * DELETE - delete a resource
- * PATCH/PUT - updates, partial updates for a resource
+ * GET - get a resource/data
+ * POST - adds/creates a new resource
+ * PATCH/PUT - modify/update a resource
+ * DELETE - delete a resource/data
  */
 
-// http://localhost:3001/
-// Request - coming from the client/frontend request is incoming
-// Response - the server is => sending a response back to the client
+// add more animes
+// title, rating, release_year, episodes, hasDub
 
-app.get("/", (request, response) => {
-  return response.send("Coming from the backend server");
-});
-
-const products = [
-  { id: 1, name: "tv", price: 100 },
-  { id: 2, name: "orange", price: 20 },
-  { id: 3, name: "shoes", price: 60 },
-];
-
-app.get("/products", (req, res) => {
-
-    return res.send(products);
-})
-
-app.post("/signup", (req, res) => {
-  // some interaction with the database
-  // send something to the frontend
-});
-
-app.listen(5000, () => console.log("Server running on port: 5000"));
-
+// request
 /**
- * POST request from the frontend - context form submit request sends it to our server
- * first_name, last_name, password
- *
- *  const [firstName, setFirstName] = useState();
- *  const [lastName, setLastName] = useState();
- *  const [password, setPassword] = useState();
  *
  * const options = {
- *  method: "POST",
+ *  method: "POST"
  *  headers: {
- *      "content-type": "application/json"
- *  }
+ *    "content-type": "application/json",
+ *  },
  *  body: {
- *      "first_name": firstName,
- *      "last_name": lastName,
- *      "password": password
+ *    title,
+ *    rating,
+ *    release_year,
+ *    episodes,
+ *    hasDub
  *  }
  * }
  *
- * fetch("http://localhost:5000/signup", options)
- *
- *
+ * await fetch(url, options)
  */
+
+// Zod, Yup
+// const response = fetch(url).then(res => res.json()) 
+// converting a json object into a javascript object

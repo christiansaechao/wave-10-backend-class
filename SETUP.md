@@ -53,3 +53,78 @@
         1. starts the sever to listen for incoming requests (like api requests) and says to listen on port 3001 (on your computer, so this only works locally)
 6. Starting your server: run ``` npm run dev ```
     - inside your terminal you should see our console.log that we added to the app.listen. Congratulations you have successfully created a backend server and it's now running.
+
+## Connecting to Supabase
+
+Now that our server is running, let's connect it to a real database using Supabase (a hosted Postgres database).
+
+1. Create your Supabase project
+    - Go to [supabase.com](https://supabase.com) and sign in/sign up.
+    - Click "New Project". Give it a name (e.g. `bounty-board`), set a database password (save this somewhere safe), and pick a region close to you.
+    - Wait a minute or two for Supabase to provision your project.
+
+2. Download the packages we need
+    - Back in your terminal, in your backend project folder, run:
+    ```
+    npm i @supabase/supabase-js dotenv
+    ```
+    - `@supabase/supabase-js`: the client library that lets our Node server talk to our Supabase database.
+    - `dotenv`: lets us load secret values (like API keys) from a `.env` file instead of hardcoding them in our code.
+
+3. Grab your project keys
+    - In your Supabase project dashboard, go to the gear icon (**Project Settings**) → **API**.
+    - You'll need two values:
+        - **Project URL** (under "Project URL")
+        - **anon public** key (under "Project API keys")
+    - Keep this tab open, we're about to paste these into our project.
+
+4. Create your `.env` file
+    - In the root of your backend project (same level as `package.json`), create a new file named `.env`.
+    - Add the following, replacing the placeholders with the values from step 3:
+    ```
+    SUPABASE_URL=your_project_url_here
+    SUPABASE_KEY=your_anon_public_key_here
+    ```
+    - **Important:** never commit your `.env` file to GitHub. Create a `.gitignore` file in your project root (if you don't have one) and add:
+    ```
+    node_modules
+    .env
+    ```
+
+5. Set up the Supabase config file
+    - Inside your `src` folder, create a new folder called `config`, and inside it a file called `supabaseClient.js`.
+        [file tree]
+        - [src]
+            - [config]
+                - supabaseClient.js
+            - server.js
+    - Add the following code:
+    ```
+    import { createClient } from "@supabase/supabase-js";
+    import "dotenv/config";
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_KEY;
+
+    export const supabase = createClient(supabaseUrl, supabaseKey);
+    ```
+    - `import "dotenv/config"` loads the values from our `.env` file into `process.env` so we can read them here.
+    - `createClient` sets up our connection using the URL and key we grabbed from Supabase.
+    - We `export` the `supabase` variable so we can `import { supabase } from "../config/supabaseClient.js"` inside our controllers to run queries.
+
+6. Create your tables
+    - In the Supabase dashboard, go to the **Table Editor** (left sidebar) and click "New table" to create each table (e.g. `hunters`, `criminals`, `bounties`, `claims`), or use the **SQL Editor** to run `CREATE TABLE` statements directly.
+    - Make sure your foreign key columns (like `criminal_id`, `posted_by`, `bounty_id`, `hunter_id`) reference the correct primary keys.
+
+7. Test the connection
+    - In `server.js`, temporarily import your client and run a quick test query:
+    ```
+    import { supabase } from "./config/supabaseClient.js";
+
+    app.get("/test-db", async (req, res) => {
+        const { data, error } = await supabase.from("hunters").select("*");
+        if (error) return res.status(500).send(error.message);
+        return res.send(data);
+    });
+    ```
+    - Run `npm run dev`, visit `http://localhost:5000/test-db` in your browser, and you should see an empty array `[]` (or your data, if you added any rows in the Table Editor). That confirms your server is successfully talking to Supabase.
